@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Naufal Aziz - Retro Portfolio OS v1998</title>
+  <style>
+    /* --- PALET WARNA RETRO 90-AN --- */
+    :root {
+      --bg-teal: #008080;
+      --win-gray: #c0c0c0;
+      --win-border-light: #ffffff;
+      --win-border-dark: #808080;
+      --win-border-black: #000000;
+      --title-blue: #000080;
+      --title-text: #ffffff;
+      --text-black: #000000;
+      --terminal-green: #00ff00;
+      --font-pixel: "Courier New", Courier, monospace, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-teal);
+      font-family: var(--font-pixel);
+      height: 100vh;
+      overflow: hidden;
+      color: var(--text-black);
+      position: relative;
+    }
+
+    /* --- CRT SCANLINE FILTER --- */
+    .crt-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background-size: 100% 4px;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    /* --- CLASSIC BEVEL STYLES --- */
+    .bevel-out {
+      border-top: 2px solid var(--win-border-light);
+      border-left: 2px solid var(--win-border-light);
+      border-right: 2px solid var(--win-border-black);
+      border-bottom: 2px solid var(--win-border-black);
+      box-shadow: inset 1px 1px var(--win-gray), inset -1px -1px var(--win-border-dark);
+      background-color: var(--win-gray);
+    }
+
+    .bevel-in {
+      border-top: 2px solid var(--win-border-dark);
+      border-left: 2px solid var(--win-border-dark);
+      border-right: 2px solid var(--win-border-light);
+      border-bottom: 2px solid var(--win-border-light);
+      background-color: #ffffff;
+    }
+
+    /* --- TOP BAR --- */
+    .top-bar {
+      height: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 10px;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    .top-controls label {
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    /* --- DESKTOP ICONS --- */
+    .desktop {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      gap: 20px;
+      height: calc(100vh - 70px);
+    }
+
+    .icon-btn {
+      width: 85px;
+      text-align: center;
+      cursor: pointer;
+      color: white;
+      text-shadow: 1px 1px 2px black;
+    }
+
+    .icon-btn:hover .icon-text {
+      background-color: var(--title-blue);
+      outline: 1px dotted white;
+    }
+
+    .icon-img {
+      font-size: 36px;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .icon-text {
+      font-size: 11px;
+      padding: 2px 4px;
+      word-wrap: break-word;
+    }
+
+    /* --- WINDOW SYSTEM --- */
+    .window {
+      position: absolute;
+      width: 480px;
+      min-height: 250px;
+      display: none;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    .window.active {
+      display: flex;
+    }
+
+    .window-header {
+      background-color: var(--title-blue);
+      color: var(--title-text);
+      padding: 4px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: move;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 3px;
+    }
+
+    .win-btn {
+      width: 16px;
+      height: 14px;
+      font-size: 10px;
+      line-height: 12px;
+      text-align: center;
+      font-weight: bold;
+      cursor: pointer;
+      background: var(--win-gray);
+      color: black;
+      border-top: 1px solid #fff;
+      border-left: 1px solid #fff;
+      border-right: 1px solid #000;
+      border-bottom: 1px solid #000;
+    }
+
+    .win-btn:active {
+      border-top: 1px solid #000;
+      border-left: 1px solid #000;
+      border-right: 1px solid #fff;
+      border-bottom: 1px solid #fff;
+    }
+
+    .window-body {
+      padding: 12px;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 400px;
+      font-size: 13px;
+    }
+
+    /* --- TASKBAR & START MENU --- */
+    .taskbar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 3px 6px;
+      z-index: 10000;
+    }
+
+    .start-btn {
+      padding: 4px 12px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .clock {
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+
+    .start-menu {
+      position: fixed;
+      bottom: 42px;
+      left: 4px;
+      width: 200px;
+      display: none;
+      flex-direction: column;
+      z-index: 10001;
+    }
+
+    .start-menu-item {
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .start-menu-item:hover {
+      background-color: var(--title-blue);
+      color: white;
+    }
+
+    /* --- APP SPECIFIC CONTENT --- */
+    .project-card {
+      padding: 8px;
+      margin-bottom: 10px;
+      background: #f9f9f9;
+    }
+
+    .skill-bar {
+      margin-bottom: 8px;
+    }
+
+    .skill-progress {
+      height: 14px;
+      background: #eee;
+      margin-top: 2px;
+    }
+
+    .skill-fill {
+      height: 100%;
+      background: var(--title-blue);
+    }
+
+    .terminal {
+      background: black;
+      color: var(--terminal-green);
+      font-family: monospace;
+      padding: 10px;
+      min-height: 180px;
+    }
+
+    .terminal-input {
+      background: transparent;
+      border: none;
+      color: var(--terminal-green);
+      font-family: monospace;
+      outline: none;
+      width: 75%;
+    }
+
+    .retro-btn {
+      padding: 4px 10px;
+      margin-top: 8px;
+      cursor: pointer;
+      font-family: var(--font-pixel);
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 4px;
+      margin-top: 4px;
+      margin-bottom: 8px;
+      font-family: var(--font-pixel);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Filter Garis CRT -->
+  <div class="crt-overlay" id="crtOverlay"></div>
+
+  <!-- Header Sistem Top Bar -->
+  <div class="top-bar bevel-out">
+    <span>SYSTEM: NAUFAL_AZIZ_OS_v3.1</span>
+    <div class="top-controls">
+      <label><input type="checkbox" id="toggleSound" checked> 🔊 Audio</label>
+      <label><input type="checkbox" id="toggleCRT" checked> 📺 CRT FX</label>
+    </div>
+  </div>
+
+  <!-- Ikon Desktop -->
+  <div class="desktop">
+    <div class="icon-btn" onclick="openWindow('win-about')">
+      <span class="icon-img">💻</span>
+      <span class="icon-text">My_Profile.sys</span>
+    </div>
+    <div class="icon-btn" onclick="openWindow('win-projects')">
+      <span class="icon-img">📁</span>
+      <span class="icon-text">Projects.exe</span>
+    </div>
+    <div class="icon-btn" onclick="openWindow('win-skills')">
+      <span class="icon-img">⚡</span>
+      <span class="icon-text">Skills.dll</span>
+    </div>
+    <div class="icon-btn" onclick="openWindow('win-terminal')">
+      <span class="icon-img">📟</span>
+      <span class="icon-text">MS-DOS.com</span>
+    </div>
+    <div class="icon-btn" onclick="openWindow('win-contact')">
+      <span class="icon-img">📝</span>
+      <span class="icon-text">Contact.txt</span>
+    </div>
+  </div>
+
+  <!-- WINDOW: BIODATA & PROFIL -->
+  <div id="win-about" class="window bevel-out" style="top: 80px; left: 120px;">
+    <div class="window-header" onmousedown="dragWindow(event, 'win-about')">
+      <span>💾 My_Profile.sys - Naufal Aziz</span>
+      <div class="window-controls">
+        <div class="win-btn" onclick="closeWindow('win-about')">X</div>
+      </div>
+    </div>
+    <div class="window-body">
+      <h3>Halo, Saya Naufal Aziz! 👋</h3>
+      <br>
+      <p>Selamat datang di portofolio pribadi berbasis Web OS Retro.</p>
+      <br>
+      <div class="bevel-in" style="padding: 10px;">
+        <p><strong>Nama Lengkap:</strong> Naufal Aziz</p>
+        <p><strong>Tanggal Lahir:</strong> 14 Mei 2011</p>
+        <p><strong>Peran:</strong> Web Developer & Creative Technologist</p>
+        <p><strong>Fokus:</strong> Full-Stack Development & Interactive Web UI</p>
+        <p><strong>Status:</strong> 🟢 Open for Collaboration & Projects</p>
+      </div>
+      <br>
+      <button class="retro-btn bevel-out" onclick="playBeep(); alert('Mengunduh CV Naufal Aziz...')">💾 Unduh Resume.pdf</button>
+    </div>
+  </div>
+
+  <!-- WINDOW: PROYEK -->
+  <div id="win-projects" class="window bevel-out" style="top: 100px; left: 200px;">
+    <div class="window-header" onmousedown="dragWindow(event, 'win-projects')">
+      <span>📁 Proyek_Utama.exe</span>
+      <div class="window-controls">
+        <div class="win-btn" onclick="closeWindow('win-projects')">X</div>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="project-card bevel-in">
+        <h4>1. Retro Web OS Portfolio</h4>
+        <p>Portofolio interaktif bernuansa sistem operasi klasik tahun 90-an.</p>
+        <small>Tech: HTML5, CSS3, JavaScript (Web Audio API)</small>
+      </div>
+      <div class="project-card bevel-in">
+        <h4>2. E-Commerce Dashboard App</h4>
+        <p>Sistem manajemen toko online lengkap dengan analisa penjualan realtime.</p>
+        <small>Tech: React, Node.js, Tailwind CSS</small>
+      </div>
+      <div class="project-card bevel-in">
+        <h4>3. Interactive Web Game</h4>
+        <p>Game edukasi interaktif berbasis pemrograman JavaScript.</p>
+        <small>Tech: Canvas API, HTML5, CSS3</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- WINDOW: KEAHLIAN -->
+  <div id="win-skills" class="window bevel-out" style="top: 140px; left: 280px;">
+    <div class="window-header" onmousedown="dragWindow(event, 'win-skills')">
+      <span>⚡ Skill_Matrix.dll</span>
+      <div class="window-controls">
+        <div class="win-btn" onclick="closeWindow('win-skills')">X</div>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="skill-bar">
+        <span>HTML5 & CSS3 / JavaScript</span>
+        <div class="skill-progress bevel-in"><div class="skill-fill" style="width: 90%;"></div></div>
+      </div>
+      <div class="skill-bar">
+        <span>Frontend Development (React / Web UI)</span>
+        <div class="skill-progress bevel-in"><div class="skill-fill" style="width: 85%;"></div></div>
+      </div>
+      <div class="skill-bar">
+        <span>Backend & Logic Programming</span>
+        <div class="skill-progress bevel-in"><div class="skill-fill" style="width: 78%;"></div></div>
+      </div>
+      <div class="skill-bar">
+        <span>UI/UX Design & Prototyping</span>
+        <div class="skill-progress bevel-in"><div class="skill-fill" style="width: 82%;"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WINDOW: TERMINAL MS-DOS -->
+  <div id="win-terminal" class="window bevel-out" style="top: 120px; left: 160px;">
+    <div class="window-header" onmousedown="dragWindow(event, 'win-terminal')">
+      <span>📟 MS-DOS Prompt</span>
+      <div class="window-controls">
+        <div class="win-btn" onclick="closeWindow('win-terminal')">X</div>
+      </div>
+    </div>
+    <div class="window-body terminal" id="terminal-body">
+      <p>Naufal Aziz OS [Version 3.10.1998]</p>
+      <p>(C) Copyright Naufal Corp 1998.</p>
+      <br>
+      <p>Ketik <span style="color: yellow;">'help'</span> untuk daftar perintah.</p>
+      <br>
+      <div id="terminal-output"></div>
+      <div>
+        <span>C:\NAUFAL&gt;</span>
+        <input type="text" id="terminal-input" class="terminal-input" autofocus onkeydown="handleTerminal(event)">
+      </div>
+    </div>
+  </div>
+
+  <!-- WINDOW: KONTAK -->
+  <div id="win-contact" class="window bevel-out" style="top: 160px; left: 240px;">
+    <div class="window-header" onmousedown="dragWindow(event, 'win-contact')">
+      <span>📝 Contact.txt - Notepad</span>
+      <div class="window-controls">
+        <div class="win-btn" onclick="closeWindow('win-contact')">X</div>
+      </div>
+    </div>
+    <div class="window-body">
+      <label>Nama Anda:</label>
+      <input type="text" class="bevel-in" placeholder="Ketik nama...">
+      <label>Email / Kontak:</label>
+      <input type="text" class="bevel-in" placeholder="Ketik email...">
+      <label>Pesan:</label>
+      <textarea class="bevel-in" rows="4" placeholder="Ketik pesan Anda..."></textarea>
+      <button class="retro-btn bevel-out" onclick="playBeep(); alert('Pesan Anda telah dikirim ke Naufal Aziz!');">📧 Kirim Pesan</button>
+    </div>
+  </div>
+
+  <!-- START MENU -->
+  <div id="start-menu" class="start-menu bevel-out">
+    <div class="start-menu-item" onclick="openWindow('win-about'); toggleStartMenu();">💻 Profil Naufal</div>
+    <div class="start-menu-item" onclick="openWindow('win-projects'); toggleStartMenu();">📁 Portofolio Proyek</div>
+    <div class="start-menu-item" onclick="openWindow('win-skills'); toggleStartMenu();">⚡ Keahlian</div>
+    <div class="start-menu-item" onclick="openWindow('win-terminal'); toggleStartMenu();">📟 Terminal DOS</div>
+    <div class="start-menu-item" onclick="openWindow('win-contact'); toggleStartMenu();">📝 Hubungi Naufal</div>
+  </div>
+
+  <!-- TASKBAR -->
+  <div class="taskbar bevel-out">
+    <button class="start-btn bevel-out" onclick="toggleStartMenu(); playBeep();">
+      <span>🖥️</span> <strong>Start</strong>
+    </button>
+    <div class="clock bevel-in" id="clock">12:00 PM</div>
+  </div>
+
+  <script>
+    // --- EFEK AUDIO SYNTHESIZER ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep() {
+      if (!document.getElementById('toggleSound').checked) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = 600;
+      gain.gain.value = 0.05;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.05);
+    }
+
+    // --- SAKLAR FILTET CRT ---
+    document.getElementById('toggleCRT').addEventListener('change', (e) => {
+      document.getElementById('crtOverlay').style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    // --- MANAJEMEN JENDELA & DRAG ---
+    let topZ = 100;
+    function openWindow(id) {
+      playBeep();
+      const win = document.getElementById(id);
+      win.classList.add('active');
+      win.style.zIndex = ++topZ;
+    }
+
+    function closeWindow(id) {
+      playBeep();
+      document.getElementById(id).classList.remove('active');
+    }
+
+    function dragWindow(e, id) {
+      const win = document.getElementById(id);
+      win.style.zIndex = ++topZ;
+      let shiftX = e.clientX - win.getBoundingClientRect().left;
+      let shiftY = e.clientY - win.getBoundingClientRect().top;
+
+      function moveAt(pageX, pageY) {
+        win.style.left = pageX - shiftX + 'px';
+        win.style.top = pageY - shiftY + 'px';
+      }
+
+      function onMouseMove(event) {
+        moveAt(event.pageX, event.pageY);
+      }
+
+      document.addEventListener('mousemove', onMouseMove);
+
+      document.onmouseup = function() {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.onmouseup = null;
+      };
+    }
+
+    // --- TOGGLE START MENU ---
+    function toggleStartMenu() {
+      const menu = document.getElementById('start-menu');
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    // --- JAM REALTIME ---
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // --- LOGIKA TERMINAL MS-DOS ---
+    function handleTerminal(e) {
+      if (e.key === 'Enter') {
+        playBeep();
+        const input = document.getElementById('terminal-input');
+        const output = document.getElementById('terminal-output');
+        const cmd = input.value.trim().toLowerCase();
+
+        let res = '';
+        if (cmd === 'help') {
+          res = 'Perintah yang tersedia: help, about, skills, clear';
+        } else if (cmd === 'about') {
+          res = 'Naufal Aziz (Lahir: 14 Mei 2011) - Web Developer & Tech Enthusiast.';
+        } else if (cmd === 'skills') {
+          res = 'JavaScript, React, Node.js, HTML5/CSS3, UI/UX Design';
+        } else if (cmd === 'clear') {
+          output.innerHTML = '';
+          input.value = '';
+          return;
+        } else if (cmd !== '') {
+          res = `'${cmd}' tidak dikenali sebagai perintah. Ketik 'help'.`;
+        }
+
+        output.innerHTML += `<div>C:\\NAUFAL&gt; ${input.value}</div><div>${res}</div><br>`;
+        input.value = '';
+        document.getElementById('terminal-body').scrollTop = document.getElementById('terminal-body').scrollHeight;
+      }
+    }
+  </script>
+</body>
+</html>
